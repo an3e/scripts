@@ -27,7 +27,7 @@ isExecuted() {
 isInstalled() {
     while [ $# -gt 0 ]; do
         which ${1} &> /dev/null && shift 1 && continue
-        printf "Utility '%s' is not available on your system. Please install it!\n" "${1}" >&2; \
+        printf "Utility '%s' is not available on your system. Please install it!\n" "${1}" >&2;
         return 1;
     done
     return 0;
