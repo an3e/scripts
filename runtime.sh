@@ -23,14 +23,19 @@ isExecuted() {
 ###############################################################################
 
 # returns true when all the binaries given in parameter list are installed
-# false - when not
+# false - when not (number of missed utilities)
 isInstalled() {
+    local missed="0"
     while [ $# -gt 0 ]; do
-        which ${1} &> /dev/null && shift 1 && continue
-        printf "Utility '%s' is not available on your system. Please install it!\n" "${1}" >&2;
-        return 1;
+        local utility="${1}"
+        shift 1
+        which "${utility}" &> /dev/null && continue
+        [[ ${missed} -eq 0 ]] \
+            && printf "Following utilities are not available in \$PATH:\n" >&2
+        ((missed++))
+        printf "\t'%s'\n" "${utility}" >&2;
     done
-    return 0;
+    return ${missed};
 }
 
 ###############################################################################
