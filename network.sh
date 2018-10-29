@@ -31,23 +31,29 @@ conn2ssh() {
 
 ###############################################################################
 
-getRsyncCmd() {
-    [[ $# -ge 4 ]] || {
-        printf "%s(): invalid number of arguments [%d]!\n" "${FUNCNAME[0]}" $# >&2
-        return $(die)
-    }
+doRsync() {
+
+    local pas=""
+    local usr=""
+    local src=""
+    local dst=""
+    local -i args=0
     
-    local pas="${1}"
-    local usr="${2}"
-    local src="${3}"
-    local dst="${4}"
-    local out="${5:-__${FUNCNAME[0]^^}}"
+    while [ $# -gt 0 ]; do
+        case "${1}" in
+            -p) [[ -n "${2}" ]] && pas="${2}" && ((args++)) && shift 1;;
+            -u) [[ -n "${2}" ]] && usr="${2}" && ((args++)) && shift 1;;
+            -s) [[ -n "${2}" ]] && src="${2}" && ((args++)) && shift 1;;
+            -d) [[ -n "${2}" ]] && dst="${2}" && ((args++)) && shift 1;;
+        esac
+        shift 1
+    done
     
     getLengthMin "${pas}" "${usr}" "${src}" "${dst}" && \
         printf "%s(): one of arguments is empty! [%s] [%s] [%s] [%s]\n" \
         ${FUNCNAME[0]} "${pas}" "${usr}" "${src}" "${dst}" >&2 && \
         return $(die)
-        
+
     isInstalled rsync ssh sshpass || return $(die)
     
     local cmd=""
@@ -61,34 +67,9 @@ getRsyncCmd() {
     cmd+=" --timeout=60"        # if no data is transferred during timeout [seconds] then the rsync will exit
     cmd+=" --progress"          # show progress during backup is being performed
     cmd+=" --human-readable"    # show numbers in a more human readable format"
-
-    printf -v ${out} "%s %s %s" "${cmd}" "${src}" "${dst}"
-}
-
-###############################################################################
-
-doRsync() {
-
-    local pas=""
-    local usr=""
-    local src=""
-    local dst=""
-    local -i args=0
     
-    while getopts p:u:s:d: var; do
-        case ${var} in
-            p) pas="${OPTARG}" && ((args++));;
-            u) usr="${OPTARG}" && ((args++));;
-            s) src="${OPTARG}" && ((args++));;
-            d) dst="${OPTARG}" && ((args++));;
-            *) printf "Invalid option %s\n" "${var}" >&2 && return $(die);;
-        esac
-    done
-    
-    [[ ${args} -ge 4 ]] || return $(die)
-    
-    set -- "${pas}" "${usr}" "${src}" "${dst}"
-    getRsyncCmd ${@} && eval "${__GETRSYNCCMD}"
+    echo "${cmd} ${src} ${dst}"
+    eval "${cmd} ${src} ${dst}"
 }
 
 ###############################################################################
