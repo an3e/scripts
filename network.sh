@@ -33,7 +33,6 @@ conn2ssh() {
 
 doRsync() {
 
-    local pas=""
     local usr=""
     local src=""
     local dst=""
@@ -41,7 +40,6 @@ doRsync() {
     
     while [ $# -gt 0 ]; do
         case "${1}" in
-            -p) [[ -n "${2}" ]] && pas="${2}" && ((args++)) && shift 1;;
             -u) [[ -n "${2}" ]] && usr="${2}" && ((args++)) && shift 1;;
             -s) [[ -n "${2}" ]] && src="${2}" && ((args++)) && shift 1;;
             -d) [[ -n "${2}" ]] && dst="${2}" && ((args++)) && shift 1;;
@@ -49,16 +47,16 @@ doRsync() {
         shift 1
     done
     
-    getLengthMin "${pas}" "${usr}" "${src}" "${dst}" && \
+    getLengthMin "${usr}" "${src}" "${dst}" && \
         printf "%s(): one of arguments is empty! [%s] [%s] [%s] [%s]\n" \
-        ${FUNCNAME[0]} "${pas}" "${usr}" "${src}" "${dst}" >&2 && \
+        ${FUNCNAME[0]} "${usr}" "${src}" "${dst}" >&2 && \
         return $(die)
 
-    isInstalled rsync ssh sshpass || return $(die)
+    isInstalled rsync ssh || return $(die)
     
     local cmd=""
     cmd+="$(which rsync)"
-    cmd+=" --rsh=\"$(which sshpass) -p ${pas} $(which ssh) -l ${usr}\""
+    cmd+=" --rsh=\"$(which ssh) -l ${usr}\""
     cmd+=" --verbose"           # be verbose during backup
     cmd+=" --recursive"         # copy directories recursively
     cmd+=" --delete-during"     # delete files in destination folder that are not available in source folder during backup
