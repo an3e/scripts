@@ -48,7 +48,7 @@ doRsync() {
     done
     
     getLengthMin "${usr}" "${src}" "${dst}" && \
-        printf "%s(): one of arguments is empty! [%s] [%s] [%s] [%s]\n" \
+        printf "%s(): one of arguments is empty! [%s] [%s] [%s]\n" \
         ${FUNCNAME[0]} "${usr}" "${src}" "${dst}" >&2 && \
         return $(die)
 
